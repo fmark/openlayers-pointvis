@@ -258,10 +258,10 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
 					scaled = pixel_val * 255
 					if (pixel_val > maxp) maxp = pixel_val; if (pixel_val < minp) minp = pixel_val;
 
-					pix[idx] = scaled; //scale to a byte, need to improve method
-					pix[idx + 1] = scaled; //scale to a byte, need to improve method
-					pix[idx + 2] = scaled; //scale to a byte, need to improve method
-					pix[idx + 3] = 255; // alpha
+					pix[idx] = 0; //scale to a byte, need to improve method
+					pix[idx + 1] = 0; //scale to a byte, need to improve method
+					pix[idx + 2] = 0; //scale to a byte, need to improve method
+					pix[idx + 3] = 255 - scaled; // alpha
 					
 				}
 			}
