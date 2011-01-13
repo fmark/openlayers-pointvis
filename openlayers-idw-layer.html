@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>OpenLayers IDW Layer (using &lt;canvas&gt;)</title>
+<script src="http://openlayers.org/api/OpenLayers.js" type="text/javascript"></script>
+<script src="http://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=6.2" type="text/javascript"></script>
+<script src="IDWLayer.js" type="text/javascript"></script>
+<script type="text/javascript">
+//<![CDATA[
+ 
+var map;
+ 
+function init() {
+map = new OpenLayers.Map('map', {
+                    controls: [
+                        new OpenLayers.Control.Navigation(),
+                        new OpenLayers.Control.PanZoomBar(),
+                        new OpenLayers.Control.LayerSwitcher({'ascending':false}),
+                        new OpenLayers.Control.MousePosition(),
+//                        new OpenLayers.Control.KeyboardDefaults()
+                    ],
+});
+
+
+var idw = new IDW.Layer("IDW");
+
+var coordinates = [
+
+[ /* 31628 */ 54.7408333333, 9.43472222222, 0.2 ],
+[ /* 4666 */ 54.4700375, 9.51416, 0.8 ],
+[ /* 15236 */ 54.6144, 9.894, 0.1 ],
+[ /* 33766 */ 54.477019, 9.051147, 0.9 ],
+[ /* 46759 */ 54.4508333333, 11.1463888889 , 0.1],
+[ /* 47075 */ 54.4388888889, 11.1972222222 , 0.1],
+[ /* 47273 */ 54.5261111111, 9.91555555556 , 0.1],
+[ /* 58696 */ 54.4563888889, 11.2125 , 0.1],
+[ /* 39069 */ 54.8122777778, 9.46488888889 , 0.1],
+[ /* 41256 */ 54.3265, 10.14 , 0.1],
+[ /* 53322 */ 54.5280555556, 8.5125 , 0.1],
+[ /* 53326 */ 54.4652777778, 8.72638888889 , 0.1],
+[ /* 53327 */ 54.4633333333, 8.55305555556 , 0.1],
+[ /* 64553 */ 54.4683333333, 11.1438888889 , 0.1],
+[ /* 53876 */ 54.48, 11.0677777778 , 0.1],
+[ /* 54862 */ 54.4, 8.9 , 0.1],
+[ /* 44473 */ 54.4241666667, 11.1911111111 , 0.1],
+[ /* 45785 */ 54.618279, 9.95276 , 0.1],
+[ /* 68881 */ 54.2, 10.55 , 0.1],
+[ /* 115426 */ 54.456302, 8.646408 , 0.1],
+[ /* 91766 */ 54.2158333333, 9.89083333333 , 0.1],
+[ /* 164051 */ 54.225625, 9.518679 , 0.1],
+[ /* 143947 */ 54.33512, 10.153049 , 0.1],
+[ /* 135138 */ 54.9333, 10.7833 , 0.1],
+[ /* 129003 */ 54.4311, 9.7987 , 0.1],
+[ /* 135361 */ 54.3488888889, 10.3188888889 , 0.1],
+[ /* 118850 */ 54.1591666667, 11.3222222222 , 0.1],
+[ /* 129720 */ 54.855856, 9.367367 , 0.1],
+[ /* 110169 */ 54.363309, 10.296903 , 0.1],
+[ /* 166202 */ 54.3130555556, 10.1341666667 , 0.1],
+[ /* 110775 */ 54.7496, 9.028 , 0.1],
+[ /* 113478 */ 54.37, 11.085 , 0.1],
+[ /* 183136 */ 54.25, 10.5 , 0.1],
+[ /* 183156 */ 54.4198, 10.058 , 0.1],
+[ /* 132933 */ 54.497032, 9.569293 , 0.1],
+[ /* 175375 */ 54.855856, 9.367367 , 0.1],
+[ /* 192742 */ 54.4933333333, 9.57444444444 , 0.1],
+[ /* 177628 */ 54.3327777778, 10.1802777778 , 0.1],
+[ /* 242037 */ 54.7788888889, 9.43611111111 , 0.1],
+[ /* 205713 */ 54.319661, 10.133355 , 0.1],
+[ /* 160127 */ 54.3158333333, 10.1511111111 , 0.1],
+[ /* 257996 */ 54.45, 9.75 , 0.1],
+[ /* 171106 */ 54.9508333333, 8.32416666667 , 0.1],
+[ /* 265043 */ 54.7881, 8.8296 , 0.1],
+[ /* 272777 */ 54.1502777778, 10.345 , 0.1],
+[ /* 162901 */ 54.1333333333, 10.8333333333 , 0.1],
+[ /* 237607 */ 54.1572222222, 8.94333333333 , 0.1],
+];
+
+for (var latlng in coordinates) {
+  var point = new IDW.Source(new OpenLayers.LonLat(coordinates[latlng][1], coordinates[latlng][0]), coordinates[latlng][2]);
+  idw.addSource(point);
+}
+
+idw.defaultIntensity = 0.1;
+idw.setOpacity(0.33);
+
+var shaded = new OpenLayers.Layer.VirtualEarth("VirtualEarth Shaded", {
+  type: VEMapStyle.Shaded,
+  animationEnabled: false
+});
+
+//var wms = new OpenLayers.Layer.WMS("OpenLayers WMS", "http://labs.metacarta.com/wms/vmap0", {layers: 'basic'});
+ 
+map.addLayers([shaded, /*wms,*/ idw]);
+map.zoomToExtent(idw.getDataExtent());
+
+}
+ 
+//]]>
+</script>
+<title></title>
+</head>
+<body onload="init()">
+<div style="width: 800px; margin: auto">
+<h1 style='text-align:center'>OpenLayers IDW Layer (using &lt;canvas&gt;)</h1>
+<div id="map" style='height:600px'></div>
+</body>
+</html>
