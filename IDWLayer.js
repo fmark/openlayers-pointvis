@@ -223,8 +223,6 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
 	//get the inverse distance weighting
 	var start = +new Date();
 	var iii = 0
-	var maxp = -999999
-	var minp = 999999
 
 	for (var x = 0; x < this.canvas.width; x += this.pixelSize){
 		for (var y = 0; y < this.canvas.height; y += this.pixelSize){		
@@ -256,7 +254,6 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
 					}
 					idx = (this.canvas.width * dy + dx) * 4;
 					scaled = pixel_val * 255
-					if (pixel_val > maxp) maxp = pixel_val; if (pixel_val < minp) minp = pixel_val;
 
 					pix[idx] = 0; //scale to a byte, need to improve method
 					pix[idx + 1] = 0; //scale to a byte, need to improve method
