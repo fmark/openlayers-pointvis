@@ -5,6 +5,17 @@
  *
  */
 
+ // START GUNK
+ function appendErro(str){
+   throw new Error("DEBUG: "+str)
+}
+
+function log(str){
+   setTimeout("appendErro('"+str+"')", 1)
+}
+//END GUNK
+ 
+ 
 IDW = {};
 
 /**
@@ -19,10 +30,10 @@ IDW.Source = OpenLayers.Class({
   lonlat: null,
 
   /** 
-   * APIProperty: value
+   * APIProperty: val
    * {Number} Heat source value
    */
-  value: null,
+  val: null,
 
   /**
    * Constructor: IDW.Source
@@ -30,11 +41,11 @@ IDW.Source = OpenLayers.Class({
    *
    * Parameters:
    * lonlat - {OpenLayers.LonLat} Coordinates of the heat source
-   * value - Data value
+   * val - Data value
    */
-  initialize: function(lonlat, value) {
+  initialize: function(lonlat, val) {
     this.lonlat = lonlat;
-    this.value = value;
+    this.val = val;
   },
 
   CLASS_NAME: 'IDW.Source'
@@ -90,6 +101,9 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
     OpenLayers.Layer.prototype.initialize.apply(this, arguments);
     this.points = [];
     this.cache = {};
+	this.maxNeighbours = 12;
+	this.power = 2;
+	this.pixelSize = 16;
     this.canvas = document.createElement('canvas');
     this.canvas.style.position = 'absolute';
     this.setGradientStops({
@@ -186,13 +200,12 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
       return;
 
     // Pick some point on the map and use it to determine the offset
-    // between the map's 0,0 coordinate and the layer's 0,0 position.
+    // between the viewports's 0,0 coordinate and the layer's 0,0 position.
     var someLoc = new OpenLayers.LonLat(0,0);
     var offsetX = this.map.getViewPortPxFromLonLat(someLoc).x -
                   this.map.getLayerPxFromLonLat(someLoc).x;
     var offsetY = this.map.getViewPortPxFromLonLat(someLoc).y -
                   this.map.getLayerPxFromLonLat(someLoc).y;
-
     this.canvas.width = this.map.getSize().w;
     this.canvas.height = this.map.getSize().h;
 
@@ -202,48 +215,66 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
     ctx.fillStyle = 'transparent';
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     ctx.restore();
-
-    for (var i in this.points) {
-
-	  var rad = 20; //DELETE ME LATER, NASTY HACK
-      var src = this.points[i];
-      var val = src.value
-      var pos = this.map.getLayerPxFromLonLat(src.lonlat);
-      var x = pos.x - rad + offsetX;
-      var y = pos.y - rad + offsetY;
-
-      if (!this.cache[val]) {
-        this.cache[val] = {};
-      }
-
-      if (!this.cache[val][rad]) {
-        var grd = ctx.createRadialGradient(rad, rad, 0, rad, rad, rad);
-        grd.addColorStop(0.0, 'rgba(0, 0, 0, ' + val + ')');
-        grd.addColorStop(1.0, 'transparent');
-        this.cache[val][rad] = grd;
-      }
-
-      ctx.fillStyle = this.cache[val][rad];
-      ctx.translate(x, y);
-      ctx.fillRect(0, 0, 2 * rad, 2 * rad);
-      ctx.translate(-x, -y);
-    }
-
-	//colorise according to the linear interpolation provided by a gradient
-    var dat = ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
-    var dim = this.canvas.width * this.canvas.height * 4;
+	
+	//setup canvas
+	var dat = ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
     var pix = dat.data;
+	
+	//get the inverse distance weighting
+	var start = +new Date();
+	var iii = 0
+	var maxp = -999999
+	var minp = 999999
 
-    for (var p = 0; p < dim; /* */) {
-      var a = pix[ p + 3 ] * 4;
-      pix[ p++ ] = this.gradient[ a++ ];
-      pix[ p++ ] = this.gradient[ a++ ];
-      pix[ p++ ] = this.gradient[ a++ ];
-      pix[ p++ ] = this.gradient[ a++ ];
-    }
+	for (var x = 0; x < this.canvas.width; x += this.pixelSize){
+		for (var y = 0; y < this.canvas.height; y += this.pixelSize){		
+			iii++;
+			var dists = [];
+			var sum_dist = 0;
+			// calculate, record and sum the (decayed) distances
+			for (var i in this.points){
+				var dest = this.points[i];
+				var destpos = this.map.getViewPortPxFromLonLat(dest.lonlat);
+				var eucdist = Math.pow(x - destpos.x, 2) +  Math.pow(y - destpos.y, 2);
+				var dist_decayed = Math.pow(eucdist, -this.power);
+				sum_dist += dist_decayed;
+				dists.push({dist: dist_decayed, val: dest.val});
+			}
+			// calculate the inverse distance weight
+			var pixel_val = 0;
+			for (var i = 0, len = dists.length; i < len; i++){
+				pixel_val += dists[i].val * dists[i].dist / sum_dist
+				
+			}
+			
+			//set the pixel values - we are typically setting more than one pixel
+			for (dx = x - (this.pixelSize / 2), maxx = dx + this.pixelSize; dx < maxx; dx++){
+				for (dy = y - (this.pixelSize / 2), maxy = dy + this.pixelSize; dy < maxy; dy++){
+					if ((dx < 0) || (dx >= this.canvas.width) || 
+					    (dy < 0) || (dy >= this.canvas.height)){
+						continue;
+					}
+					idx = (this.canvas.width * dy + dx) * 4;
+					scaled = pixel_val * 255
+					if (pixel_val > maxp) maxp = pixel_val; if (pixel_val < minp) minp = pixel_val;
 
+					pix[idx] = scaled; //scale to a byte, need to improve method
+					pix[idx + 1] = scaled; //scale to a byte, need to improve method
+					pix[idx + 2] = scaled; //scale to a byte, need to improve method
+					pix[idx + 3] = 255; // alpha
+					
+				}
+			}
+			
+		}
+		
+	}
+	//save the image	
     ctx.putImageData(dat, 0, 0);
-
+	var end =  +new Date();
+	var diff = end - start;
+	log(iii + " iterations took " + (diff / 1000) + " seconds.")
+	
     // Unfortunately OpenLayers does not currently support layers that
     // remain in a fixed position with respect to the screen location
     // of the base layer, so this puts this layer manually back into
@@ -269,7 +300,6 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
         maxExtent.extend(point.lonlat);
       }
     }
-
     return maxExtent;
   },
 
