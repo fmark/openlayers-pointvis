@@ -1,0 +1,13 @@
+TODO:
+
+* Colours
+* Scale pixel values to 0.0 - 1.0 before choosing a colour.
+* Increase opacity of IDW layer
+* Remove strip on right and bottom where pixel blocks are missed by iterating one more time in each direction
+* Add markers for each of the points?
+* Make the markers display their value on click?
+* Rather than calculating each x by x block (to reduce runtime), calculate a smaller grid and then resample linearly to create a smoother surface
+   * SPEEDUP - experiment with the size to resample from
+* Figure out a neat way of using n nearest neighbours instead of all
+* Figure out how to pass variables (such as power, pixelSize, etc.) into constructor instead of hard-coding them
+   
