@@ -2,7 +2,7 @@ TODO:
 
 * Colours
 * Scale pixel values to 0.0 - 1.0 before choosing a colour.
-* Increase opacity of IDW layer
+* Increase opacity of IDW layer -- 13/01/2011, fmark
 * Remove strip on right and bottom where pixel blocks are missed by iterating one more time in each direction
 * Add markers for each of the points?
 * Make the markers display their value on click?
