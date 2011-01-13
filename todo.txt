@@ -10,4 +10,5 @@ TODO:
    * SPEEDUP - experiment with the size to resample from
 * Figure out a neat way of using n nearest neighbours instead of all
 * Figure out how to pass variables (such as power, pixelSize, etc.) into constructor instead of hard-coding them
+* Create legend widget
    
