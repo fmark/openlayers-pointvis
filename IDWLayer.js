@@ -253,7 +253,7 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
 								 matrix[minx][miny + 1] * (1 - dx + dy) +
 								 matrix[minx + 1][miny] * (dx + 1 - dy) +
 								 matrix[minx + 1][miny + 1] * (dx + dy))
-								 / 8;
+								 / 4;
 			} else {
 				var pixel_val = matrix[x][y];
 			}
