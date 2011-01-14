@@ -26,15 +26,23 @@ map = new OpenLayers.Map('map', {
 var idw = new IDW.Layer("IDW");
 
 var coordinates = [
-
-[ /* 31628 */ 54.7408333333, 9.43472222222, 200 ],
-[ /* 4666 */ 54.4700375, 9.51416, 220 ],
-[ /* 15236 */ 54.6144, 9.894, 210 ],
-[ /* 33766 */ 54.477019, 9.051147, 220 ],
-[ /* 46759 */ 54.4508333333, 11.1463888889 , 200],
-[ /* 47075 */ 54.4388888889, 11.1972222222 , 220],
-[ /* 47273 */ 54.5261111111, 9.91555555556 , 200],
-[ /* 58696 */ 54.4563888889, 11.2125 , 220],
+// Weather on 14 Jan 2011 at 5:45pm
+[-35.31, 149.20, 24.8],		// Canberra Airport
+[-35.72, 150.19, 26.3],		// Bateman's Bay
+[-35.43, 149.78, 25.1],		// Braidwood
+[-35.94, 148.38, 14.7],		// Cabramurra
+[-36.43, 148.33, 14.0],		// Charlotte Pass
+[-36.29, 148.97, 20.9],		// Cooma Airport
+[-34.81, 149.73, 24.7],		// Goulburn Airport
+[-36.25, 150.23, 21.8],		// Montague Island
+[-35.90, 150.14, 23.7],		// Moruya Airport
+[-35.53, 148.77, 13.7],		// Mount Ginini
+[-36.21, 150.14, 21.0],		// Narooma
+[-34.95, 150.54, 24.8],		// Nowra
+[-36.41, 148.41, 15.5],		// Perisher Valley
+[-36.49, 148.29, 13.2],		// Thredbo Top Station
+[-35.42, 149.09, 23.6],		// Tuggeranong
+[-34.83, 148.91, 26.3],		// Yass
 ];
 
 for (var latlng in coordinates) {
@@ -42,11 +50,12 @@ for (var latlng in coordinates) {
   idw.addSource(point);
 }
 
-idw.setOpacity(0.65);
+idw.setOpacity(1.0);
 idw.pixelSize = 24;
 idw.maxNeighbours = 12;
 idw.power = 2;
-idw.maxColour = 0x0000ffff
+idw.minColour = 0x053061d0;	// navy blue
+idw.maxColour = 0xff0000d0; // maroon
 
 var shaded = new OpenLayers.Layer.VirtualEarth("VirtualEarth Shaded", {
   type: VEMapStyle.Shaded,
