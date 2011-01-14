@@ -1,5 +1,5 @@
 TODO:
-* Support colour ramps, rather than 2-point gradients.  Possibly classification at some later point.
+* Support raster classification.
 * Add markers for each of the points?
 * Make the markers display their value on click?
 * Figure out a neat way of using n nearest neighbours instead of all
@@ -13,3 +13,4 @@ DONE:
 * Colours -- 14/01/2011, fmark (customisable 2-point gradient)
 * REGRESSION: Remove strip on right and bottom where pixel blocks are missed by iterating one more time in each direction  -- 14/01/2011, fmark
 * Get some meaningful sample data for an area I know. -- 14/01/2011 fmark (BoM temp observations for Canberra region on a cold summers afternoon)
+* Support colour ramps, rather than 2-point gradients. -- 14/01/2011 fmark

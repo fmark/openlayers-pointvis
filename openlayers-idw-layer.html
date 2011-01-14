@@ -50,12 +50,11 @@ for (var latlng in coordinates) {
   idw.addSource(point);
 }
 
-idw.setOpacity(1.0);
-idw.pixelSize = 24;
+idw.setOpacity(0.7);
+idw.pixelSize = 16;
 idw.maxNeighbours = 12;
 idw.power = 2;
-idw.minColour = 0x053061d0;	// navy blue
-idw.maxColour = 0xff0000d0; // maroon
+idw.colours = [0x0571B0FF, 0x92C5DEFF, 0xF4A582FF, 0xCA0020FF]
 
 var shaded = new OpenLayers.Layer.VirtualEarth("VirtualEarth Shaded", {
   type: VEMapStyle.Shaded,

@@ -78,17 +78,11 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
    */
   maxNeighbours: 12,
   
-  /** 
-   * APIProperty: minColour 
-   * {Integer} The colour representing the minimum value in the range. Defaults to 0x00ff00ff (green, 100% opacity).
+   /** 
+   * APIProperty: colours 
+   * {Integer} The stops in the colour ramp used to display the IDW.
    */
-  minColour: 0x00ff00ff,
-  
-  /** 
-   * APIProperty: maxColour 
-   * {Integer} The colour representing the minimum value in the range. Defaults to 0xff0000ff (red, 100% opacity).
-   */
-  maxColour: 0xff0000ff,
+  colours: [0xff0000ff, 0x00ff00ff, 0x00ffff],
   
     /** 
    * APIProperty: power 
@@ -230,15 +224,14 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
     var pix = dat.data;
 	var minx, dx, miny, dy;//bilinear
 	// isolate rgba components of colour for interpolating the colour ramp
-	var minCol = [(this.minColour>> 24) & 0xFF, 
-				  (this.minColour>> 16) & 0xFF,
-				  (this.minColour>> 8)  & 0xFF,
-				  (this.minColour>> 0)  & 0xFF]
-	var maxCol = [(this.maxColour>> 24) & 0xFF, 
-				  (this.maxColour>> 16) & 0xFF,
-				  (this.maxColour>> 8)  & 0xFF,
-				  (this.maxColour>> 0)  & 0xFF]
-				  for (var x = 0; x < this.canvas.width; x ++){		
+	var cols = [];
+	for (var i = 0; i < this.colours.length; i++){
+		cols[i] = [(this.colours[i] >> 24) & 0xFF, 
+				   (this.colours[i] >> 16) & 0xFF,
+				   (this.colours[i] >> 8)  & 0xFF,
+				   (this.colours[i] >> 0)  & 0xFF]
+	}
+	for (var x = 0; x < this.canvas.width; x ++){		
 		minx = (x / this.pixelSize) >> 0; //bilinear
 		dx = (x / this.pixelSize) - minx; //bilinear
 		for (var y = 0; y < this.canvas.height; y ++){		
@@ -258,7 +251,13 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
 				var pixel_val = matrix[x][y];
 			}
 			var idx = (this.canvas.width * y + x) * 4;
-			var inv_val = 1 - pixel_val
+			// Rescale to fit into colour ramp
+			var colRamp = (cols.length - 1) * pixel_val;
+			var colFloor = colRamp >> 0;
+			minCol = cols[colFloor];
+			maxCol = cols[colFloor + 1];
+			pixel_val = colRamp - colFloor;
+			var inv_val = 1 - pixel_val;
 			pix[idx  ] = minCol[0] * inv_val + maxCol[0] * pixel_val; //red
 			pix[idx+1] = minCol[1] * inv_val + maxCol[1] * pixel_val; //green
 			pix[idx+2] = minCol[2] * inv_val + maxCol[2] * pixel_val; //blue
