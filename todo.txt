@@ -2,8 +2,6 @@ TODO:
 
 * Colours
 * Scale pixel values to 0.0 - 1.0 before choosing a colour.
-* Increase opacity of IDW layer -- 13/01/2011, fmark
-* Remove strip on right and bottom where pixel blocks are missed by iterating one more time in each direction
 * Add markers for each of the points?
 * Make the markers display their value on click?
 * Rather than calculating each x by x block (to reduce runtime), calculate a smaller grid and then resample linearly to create a smoother surface
@@ -12,3 +10,6 @@ TODO:
 * Figure out how to pass variables (such as power, pixelSize, etc.) into constructor instead of hard-coding them
 * Create legend widget
    
+DONE:
+* Increase opacity of IDW layer -- 13/01/2011, fmark
+* Remove strip on right and bottom where pixel blocks are missed by iterating one more time in each direction  -- 14/01/2011, fmark

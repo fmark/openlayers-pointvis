@@ -216,16 +216,15 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     ctx.restore();
 	
-	//setup canvas
-	var dat = ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
-    var pix = dat.data;
-	
-	//get the inverse distance weighting
+	//calculate the inverse distance weighting
 	var start = +new Date();
-	var iii = 0
-
-	for (var x = 0; x < this.canvas.width; x += this.pixelSize){
-		for (var y = 0; y < this.canvas.height; y += this.pixelSize){		
+	var iii = 0;
+	var sizex = ((this.canvas.width / this.pixelSize) >> 0) + 1;
+	var sizey = ((this.canvas.height / this.pixelSize) >> 0) + 1;
+	var matrix = new Array(sizex);
+	for (var x = 0; x < sizex; x++){
+		matrix[x] = new Array(sizey);
+		for (var y = 0; y < sizey; y++){		
 			iii++;
 			var dists = [];
 			var sum_dist = 0;
@@ -233,44 +232,50 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
 			for (var i in this.points){
 				var dest = this.points[i];
 				var destpos = this.map.getViewPortPxFromLonLat(dest.lonlat);
-				var eucdist = Math.pow(x - destpos.x, 2) +  Math.pow(y - destpos.y, 2);
+				var eucdist = Math.pow(x * this.pixelSize - destpos.x, 2) + 
+					Math.pow(y * this.pixelSize - destpos.y, 2);
 				var dist_decayed = Math.pow(eucdist, -this.power);
 				sum_dist += dist_decayed;
 				dists.push({dist: dist_decayed, val: dest.val});
 			}
 			// calculate the inverse distance weight
-			var pixel_val = 0;
+			matrix[x][y] = 0;
 			for (var i = 0, len = dists.length; i < len; i++){
-				pixel_val += dists[i].val * dists[i].dist / sum_dist
-				
+				matrix[x][y] += dists[i].val * dists[i].dist / sum_dist
 			}
-			
+		}
+	}
+	var end =  +new Date();
+	var diff = end - start;
+	log("IDW calculation: " + iii + " iterations, " + (diff / 1000) + " seconds.")
+	//write to the canvas, resampling and choosing the appropriate colour
+	start = +new Date();
+	var dat = ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+    var pix = dat.data;
+	var t = false
+	for (var x = 0; x < this.canvas.width; x ++){
+		for (var y = 0; y < this.canvas.height; y ++){					
 			//set the pixel values - we are typically setting more than one pixel
-			for (dx = x - (this.pixelSize / 2), maxx = dx + this.pixelSize; dx < maxx; dx++){
-				for (dy = y - (this.pixelSize / 2), maxy = dy + this.pixelSize; dy < maxy; dy++){
-					if ((dx < 0) || (dx >= this.canvas.width) || 
-					    (dy < 0) || (dy >= this.canvas.height)){
-						continue;
-					}
-					idx = (this.canvas.width * dy + dx) * 4;
-					scaled = pixel_val * 255
-
-					pix[idx] = 0; //scale to a byte, need to improve method
-					pix[idx + 1] = 0; //scale to a byte, need to improve method
-					pix[idx + 2] = 0; //scale to a byte, need to improve method
-					pix[idx + 3] = 255 - scaled; // alpha
-					
-				}
-			}
+			//so this requires resampling
 			
+			//NEAREST NEIGHBOUR (should look blocky)
+			pixel_val = matrix[Math.round(x / this.pixelSize)][Math.round(y / this.pixelSize)]
+			idx = (this.canvas.width * y + x) * 4;
+			scaled = pixel_val * 255
+
+			pix[idx] = 0; //scale to a byte, need to improve method
+			pix[idx + 1] = 0; //scale to a byte, need to improve method
+			pix[idx + 2] = 0; //scale to a byte, need to improve method
+			pix[idx + 3] = 255 - scaled; // alpha
 		}
 		
 	}
 	//save the image	
     ctx.putImageData(dat, 0, 0);
-	var end =  +new Date();
-	var diff = end - start;
-	log(iii + " iterations took " + (diff / 1000) + " seconds.")
+	end =  +new Date();
+	diff = end - start;
+	log("Resampling and writing to canvas: " + (diff / 1000) + " seconds.")
+
 	
     // Unfortunately OpenLayers does not currently support layers that
     // remain in a fixed position with respect to the screen location
