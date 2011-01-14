@@ -252,23 +252,31 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
 	start = +new Date();
 	var dat = ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
     var pix = dat.data;
-	var t = false
-	for (var x = 0; x < this.canvas.width; x ++){
+	var minx, dx, miny, dy;//bilinear
+	for (var x = 0; x < this.canvas.width; x ++){		
+		minx = (x / this.pixelSize) >> 0; //bilinear
+		dx = (x / this.pixelSize) - minx; //bilinear
 		for (var y = 0; y < this.canvas.height; y ++){					
-			//set the pixel values - we are typically setting more than one pixel
-			//so this requires resampling
+			//If pixelSize > 1 we need to resample our IDX grid to match the canvas size
+			//NEAREST NEIGHBOUR (blocky and awful)
+			//var pixel_val = matrix[Math.round(x / this.pixelSize)][Math.round(y / this.pixelSize)]
+			//BILINEAR (moderately blockly but tolerable)
+			miny = ((y / this.pixelSize) >> 0);
+			dy = (y / this.pixelSize) - miny;
+			var pixel_val = (matrix[minx][miny] * (2 - dx - dy) +
+							 matrix[minx][miny + 1] * (1 - dx + dy) +
+							 matrix[minx + 1][miny] * (dx + 1 - dy) +
+							 matrix[minx + 1][miny + 1] * (dx + dy))
+							 / 8;
 			
-			//NEAREST NEIGHBOUR (should look blocky)
-			pixel_val = matrix[Math.round(x / this.pixelSize)][Math.round(y / this.pixelSize)]
-			idx = (this.canvas.width * y + x) * 4;
-			scaled = pixel_val * 255
+			var idx = (this.canvas.width * y + x) * 4;
+			var scaled = pixel_val * 255
 
 			pix[idx] = 0; //scale to a byte, need to improve method
 			pix[idx + 1] = 0; //scale to a byte, need to improve method
 			pix[idx + 2] = 0; //scale to a byte, need to improve method
 			pix[idx + 3] = 255 - scaled; // alpha
 		}
-		
 	}
 	//save the image	
     ctx.putImageData(dat, 0, 0);
