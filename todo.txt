@@ -2,6 +2,9 @@ TODO:
 * Support raster classification.
 * Add markers for each of the points?
 * Make the markers display their value on click?
+* Create an 'info' tool that gets the value under the cursor
+* Abstract out the structure from the function to make adding new types easier
+* Implement bicubic resampler, as an option if significantly slower
 * Figure out a neat way of using n nearest neighbours instead of all
 * Create legend widget
    
