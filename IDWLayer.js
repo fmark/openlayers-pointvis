@@ -193,8 +193,8 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
 	//calculate the inverse distance weighting
 	var start = +new Date();
 	var iii = 0;
-	var sizex = ((this.canvas.width / this.pixelSize) >> 0) + 1;
-	var sizey = ((this.canvas.height / this.pixelSize) >> 0) + 1;
+	var sizex = ((this.canvas.width / this.pixelSize) >> 0) + 2;
+	var sizey = ((this.canvas.height / this.pixelSize) >> 0) + 2;
 	var matrix = new Array(sizex);
 	var val_range = this.maxval - this.minval; //rescale to 0.0 - 1.0
 	for (var x = 0; x < sizex; x++){
