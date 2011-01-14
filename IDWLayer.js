@@ -295,12 +295,11 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
 				var pixel_val = matrix[x][y];
 			}
 			var idx = (this.canvas.width * y + x) * 4;
-			var scaled = pixel_val * 255
-
-			pix[idx] = 0; //scale to a byte, need to improve method
-			pix[idx + 1] = 0; //scale to a byte, need to improve method
-			pix[idx + 2] = 0; //scale to a byte, need to improve method
-			pix[idx + 3] = 255 - scaled; // alpha
+			var scaled = pixel_val * 255;
+			pix[idx] = scaled;
+			pix[idx + 1] = 255 - scaled;
+			pix[idx + 2] = 0; 
+			pix[idx + 3] = 255; // alpha
 		}
 	}
 	//save the image	
