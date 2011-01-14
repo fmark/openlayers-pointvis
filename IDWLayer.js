@@ -103,18 +103,6 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
   points: null,
 
   /** 
-   * Property: cache
-   * {Object} Hashtable with CanvasGradient objects
-   */
-  cache: null,
-
-  /** 
-   * Property: gradient
-   * {Array(Number)} RGBA gradient map used to colorize the value map.
-   */
-  gradient: null,
-
-  /** 
    * Property: canvas
    * {DOMElement} Canvas element.
    */
@@ -133,60 +121,14 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
     this.points = [];
 	this.minval = Infinity;
 	this.maxval = -Infinity;
-    this.cache = {};
     this.canvas = document.createElement('canvas');
     this.canvas.style.position = 'absolute';
-    this.setGradientStops({
-      0.00: 0xffffff00,
-      0.10: 0x99e9fdff,
-      0.20: 0x00c9fcff,
-      0.30: 0x00e9fdff,
-      0.30: 0x00a5fcff,
-      0.40: 0x0078f2ff,
-      0.50: 0x0e53e9ff,
-      0.60: 0x4a2cd9ff,
-      0.70: 0x890bbfff,
-      0.80: 0x99019aff,
-      0.90: 0x990664ff,
-      0.99: 0x660000ff,
-      1.00: 0x000000ff
-    });
 
     // For some reason OpenLayers.Layer.setOpacity assumes there is
     // an additional div between the layer's div and its contents.
     var sub = document.createElement('div');
     sub.appendChild(this.canvas);
     this.div.appendChild(sub);
-  },
-
-  /**
-   * APIMethod: setGradientStops
-   * ...
-   *
-   * Parameters:
-   * stops - {Object} Hashtable with stop position as keys and colors
-   *                  as values. Stop positions are numbers between 0
-   *                  and 1, color values numbers in 0xRRGGBBAA form.
-   */
-  setGradientStops: function(stops) {
-
-    // There is no need to perform the linear interpolation manually,
-    // it is sufficient to let the canvas implementation do that.
-
-    var ctx = document.createElement('canvas').getContext('2d');
-    var grd = ctx.createLinearGradient(0, 0, 256, 0);
-
-    for (var i in stops) {
-      grd.addColorStop(i, 'rgba(' +
-        ((stops[i] >> 24) & 0xFF) + ',' +
-        ((stops[i] >> 16) & 0xFF) + ',' +
-        ((stops[i] >>  8) & 0xFF) + ',' +
-        ((stops[i] >>  0) & 0xFF) + ')');
-    }
-
-    ctx.fillStyle = grd;
-    ctx.fillRect(0, 0, 256, 1);
-    this.gradient = ctx.getImageData(0, 0, 256, 1).data;
   },
 
   /**
