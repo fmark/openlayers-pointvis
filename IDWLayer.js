@@ -79,6 +79,18 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
   maxNeighbours: 12,
   
   /** 
+   * APIProperty: minColour 
+   * {Integer} The colour representing the minimum value in the range. Defaults to 0x00ff00ff (green, 100% opacity).
+   */
+  minColour: 0x00ff00ff,
+  
+  /** 
+   * APIProperty: maxColour 
+   * {Integer} The colour representing the minimum value in the range. Defaults to 0xff0000ff (red, 100% opacity).
+   */
+  maxColour: 0xff0000ff,
+  
+    /** 
    * APIProperty: power 
    * {Integer} The exponent of the distance decay power function. Defaults to 2.
    */
@@ -275,7 +287,16 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
 	var dat = ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
     var pix = dat.data;
 	var minx, dx, miny, dy;//bilinear
-	for (var x = 0; x < this.canvas.width; x ++){		
+	// isolate rgba components of colour for interpolating the colour ramp
+	var minCol = [(this.minColour>> 24) & 0xFF, 
+				  (this.minColour>> 16) & 0xFF,
+				  (this.minColour>> 8)  & 0xFF,
+				  (this.minColour>> 0)  & 0xFF]
+	var maxCol = [(this.maxColour>> 24) & 0xFF, 
+				  (this.maxColour>> 16) & 0xFF,
+				  (this.maxColour>> 8)  & 0xFF,
+				  (this.maxColour>> 0)  & 0xFF]
+				  for (var x = 0; x < this.canvas.width; x ++){		
 		minx = (x / this.pixelSize) >> 0; //bilinear
 		dx = (x / this.pixelSize) - minx; //bilinear
 		for (var y = 0; y < this.canvas.height; y ++){		
@@ -295,11 +316,11 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
 				var pixel_val = matrix[x][y];
 			}
 			var idx = (this.canvas.width * y + x) * 4;
-			var scaled = pixel_val * 255;
-			pix[idx] = scaled;
-			pix[idx + 1] = 255 - scaled;
-			pix[idx + 2] = 0; 
-			pix[idx + 3] = 255; // alpha
+			var inv_val = 1 - pixel_val
+			pix[idx  ] = minCol[0] * inv_val + maxCol[0] * pixel_val; //red
+			pix[idx+1] = minCol[1] * inv_val + maxCol[1] * pixel_val; //green
+			pix[idx+2] = minCol[2] * inv_val + maxCol[2] * pixel_val; //blue
+			pix[idx+3] = minCol[3] * inv_val + maxCol[3] * pixel_val; //alpha
 		}
 	}
 	//save the image	

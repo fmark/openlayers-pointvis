@@ -42,10 +42,11 @@ for (var latlng in coordinates) {
   idw.addSource(point);
 }
 
-idw.setOpacity(0.6);
+idw.setOpacity(0.65);
 idw.pixelSize = 16;
 idw.maxNeighbours = 12;
 idw.power = 2;
+idw.maxColour = 0x0000ffff
 
 var shaded = new OpenLayers.Layer.VirtualEarth("VirtualEarth Shaded", {
   type: VEMapStyle.Shaded,
