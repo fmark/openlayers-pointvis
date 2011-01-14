@@ -119,6 +119,8 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
   initialize: function(name, options) {
     OpenLayers.Layer.prototype.initialize.apply(this, arguments);
     this.points = [];
+	this.minval = Infinity;
+	this.maxval = -Infinity;
     this.cache = {};
     this.canvas = document.createElement('canvas');
     this.canvas.style.position = 'absolute';
@@ -183,6 +185,8 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
    * source - {<IDW.Source>} 
    */
   addSource: function(source) {
+	if (source.val < this.minval) this.minval = source.val
+	if (source.val > this.maxval) this.maxval = source.val
     this.points.push(source);
   },
 
@@ -238,6 +242,7 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
 	var sizex = ((this.canvas.width / this.pixelSize) >> 0) + 1;
 	var sizey = ((this.canvas.height / this.pixelSize) >> 0) + 1;
 	var matrix = new Array(sizex);
+	var val_range = this.maxval - this.minval; //rescale to 0.0 - 1.0
 	for (var x = 0; x < sizex; x++){
 		matrix[x] = new Array(sizey);
 		for (var y = 0; y < sizey; y++){		
@@ -259,6 +264,7 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
 			for (var i = 0, len = dists.length; i < len; i++){
 				matrix[x][y] += dists[i].val * dists[i].dist / sum_dist
 			}
+			matrix[x][y] = (matrix[x][y] - this.minval) / val_range;
 		}
 	}
 	var end =  +new Date();
