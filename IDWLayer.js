@@ -64,6 +64,25 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
    * {Boolean} IDW layer is never a base layer.  
    */
   isBaseLayer: false,
+  
+  
+  /** 
+   * APIProperty: pixelSize 
+   * {Integer} The number of pixels between each point for which IDW is calculated (the rest are interpolated).  Defaults to 16.
+   */
+  pixelSize: 16,
+
+  /** 
+   * APIProperty: maxNeighbours 
+   * {Integer} The maximum number of neighbours to use in the calculation.  Defaults to 12.  Values < 1 are use all neighbours.
+   */
+  maxNeighbours: 12,
+  
+  /** 
+   * APIProperty: power 
+   * {Integer} The exponent of the distance decay power function. Defaults to 2.
+   */
+  power: 2,
 
   /** 
    * Property: points
@@ -101,9 +120,6 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
     OpenLayers.Layer.prototype.initialize.apply(this, arguments);
     this.points = [];
     this.cache = {};
-	this.maxNeighbours = 12;
-	this.power = 2;
-	this.pixelSize = 16;
     this.canvas = document.createElement('canvas');
     this.canvas.style.position = 'absolute';
     this.setGradientStops({
@@ -256,19 +272,22 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
 	for (var x = 0; x < this.canvas.width; x ++){		
 		minx = (x / this.pixelSize) >> 0; //bilinear
 		dx = (x / this.pixelSize) - minx; //bilinear
-		for (var y = 0; y < this.canvas.height; y ++){					
-			//If pixelSize > 1 we need to resample our IDX grid to match the canvas size
-			//NEAREST NEIGHBOUR (blocky and awful)
-			//var pixel_val = matrix[Math.round(x / this.pixelSize)][Math.round(y / this.pixelSize)]
-			//BILINEAR (moderately blockly but tolerable)
-			miny = ((y / this.pixelSize) >> 0);
-			dy = (y / this.pixelSize) - miny;
-			var pixel_val = (matrix[minx][miny] * (2 - dx - dy) +
-							 matrix[minx][miny + 1] * (1 - dx + dy) +
-							 matrix[minx + 1][miny] * (dx + 1 - dy) +
-							 matrix[minx + 1][miny + 1] * (dx + dy))
-							 / 8;
-			
+		for (var y = 0; y < this.canvas.height; y ++){		
+			if (this.pixelSize > 1){
+				//If pixelSize > 1 we need to resample our IDX grid to match the canvas size
+				//NEAREST NEIGHBOUR (blocky and awful)
+				//var pixel_val = matrix[Math.round(x / this.pixelSize)][Math.round(y / this.pixelSize)]
+				//BILINEAR (moderately blockly but tolerable)
+				miny = ((y / this.pixelSize) >> 0);
+				dy = (y / this.pixelSize) - miny;
+				var pixel_val = (matrix[minx][miny] * (2 - dx - dy) +
+								 matrix[minx][miny + 1] * (1 - dx + dy) +
+								 matrix[minx + 1][miny] * (dx + 1 - dy) +
+								 matrix[minx + 1][miny + 1] * (dx + dy))
+								 / 8;
+			} else {
+				var pixel_val = matrix[x][y];
+			}
 			var idx = (this.canvas.width * y + x) * 4;
 			var scaled = pixel_val * 255
 

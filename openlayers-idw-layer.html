@@ -44,6 +44,9 @@ for (var latlng in coordinates) {
 
 idw.defaultIntensity = 0.1;
 idw.setOpacity(0.8);
+idw.pixelSize = 16;
+idw.maxNeighbours = 12;
+idw.power = 2;
 
 var shaded = new OpenLayers.Layer.VirtualEarth("VirtualEarth Shaded", {
   type: VEMapStyle.Shaded,
