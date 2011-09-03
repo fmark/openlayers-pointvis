@@ -191,18 +191,27 @@ IDW.Layer = OpenLayers.Class(OpenLayers.Layer, {
 	var sizey = ((this.canvas.height / this.pixelSize) >> 0) + 2;
 	var matrix = new Array(sizex);
 	var val_range = this.maxval - this.minval; //rescale to 0.0 - 1.0
+      
+      // calculate this beforehand, so it isn't calculated on each iteration
+      var pointsLen = this.points.length;
+      for (var i = 0; i < pointsLen; i++) {
+	  this.points[i].destpos = 
+	      this.map.getViewPortPxFromLonLat(this.points[i].lonlat);
+      }
+
 	for (var x = 0; x < sizex; x++){
 		matrix[x] = new Array(sizey);
 		for (var y = 0; y < sizey; y++){		
 			iii++;
 			var dists = [];
-			var sum_dist = 0;
+		    var sum_dist = 0;
+		    
+
 			// calculate, record and sum the (decayed) distances
 			for (var i in this.points){
 				var dest = this.points[i];
-				var destpos = this.map.getViewPortPxFromLonLat(dest.lonlat);
-				var eucdist = Math.pow(x * this.pixelSize - destpos.x, 2) + 
-					Math.pow(y * this.pixelSize - destpos.y, 2);
+				var eucdist = Math.pow(x * this.pixelSize - dest.destpos.x, 2) + 
+					Math.pow(y * this.pixelSize - dest.destpos.y, 2);
 				var dist_decayed = Math.pow(eucdist, -this.power);
 				sum_dist += dist_decayed;
 				dists.push({dist: dist_decayed, val: dest.val});
